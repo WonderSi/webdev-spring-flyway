@@ -4,13 +4,13 @@ import com.example.lab4.domain.model.Dish
 import com.example.lab4.domain.port.DishRepositoryPort
 import com.example.lab4.infrastructure.jpa.entity.DishEntity
 import com.example.lab4.infrastructure.jpa.repository.DishJpaRepository
-import org.springframework.context.annotation.Profile
+import com.example.lab4.infrastructure.jpa.repository.RestaurantJpaRepository
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("db")
 class DishJpaAdapter(
-    private val dishJpaRepository: DishJpaRepository
+    private val dishJpaRepository: DishJpaRepository,
+    private val restaurantJpaRepository: RestaurantJpaRepository
 ) : DishRepositoryPort {
 
     override fun findAll(): List<Dish> =
@@ -25,11 +25,23 @@ class DishJpaAdapter(
     override fun findByName(name: String): Dish? =
         dishJpaRepository.findByName(name)?.toDomain()
 
-    override fun save(dish: Dish): Dish =
-        dishJpaRepository.save(DishEntity.fromDomain(dish)).toDomain()
+    override fun save(dish: Dish): Dish {
+        val restaurant = dish.restaurantId?.let {
+            restaurantJpaRepository.findById(it).orElseThrow {
+                NoSuchElementException("Restaurant not found: $it")
+            }
+        } ?: throw IllegalArgumentException("restaurantId is required")
+        return dishJpaRepository.save(DishEntity.fromDomain(dish, restaurant)).toDomain()
+    }
 
-    override fun update(dish: Dish): Dish =
-        dishJpaRepository.save(DishEntity.fromDomain(dish)).toDomain()
+    override fun update(dish: Dish): Dish {
+        val restaurant = dish.restaurantId?.let {
+            restaurantJpaRepository.findById(it).orElseThrow {
+                NoSuchElementException("Restaurant not found: $it")
+            }
+        } ?: throw IllegalArgumentException("restaurantId is required")
+        return dishJpaRepository.save(DishEntity.fromDomain(dish, restaurant)).toDomain()
+    }
 
     override fun deleteById(id: Long): Boolean {
         return if (dishJpaRepository.existsById(id)) {
