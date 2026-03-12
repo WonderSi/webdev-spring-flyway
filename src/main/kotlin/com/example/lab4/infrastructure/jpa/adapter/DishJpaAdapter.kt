@@ -35,12 +35,18 @@ class DishJpaAdapter(
     }
 
     override fun update(dish: Dish): Dish {
-        val restaurant = dish.restaurantId?.let {
-            restaurantJpaRepository.findById(it).orElseThrow {
-                NoSuchElementException("Restaurant not found: $it")
-            }
-        } ?: throw IllegalArgumentException("restaurantId is required")
-        return dishJpaRepository.save(DishEntity.fromDomain(dish, restaurant)).toDomain()
+        // При обновлении берём ресторан из существующего блюда
+        val existing = dishJpaRepository.findById(dish.id)
+            .orElseThrow { NoSuchElementException("Dish with id=${dish.id} not found") }
+        val updated = DishEntity(
+            id = existing.id,
+            name = dish.name,
+            description = dish.description,
+            price = dish.price,
+            isAvailable = dish.isAvailable,
+            restaurant = existing.restaurant  // берём из существующего
+        )
+        return dishJpaRepository.save(updated).toDomain()
     }
 
     override fun deleteById(id: Long): Boolean {
