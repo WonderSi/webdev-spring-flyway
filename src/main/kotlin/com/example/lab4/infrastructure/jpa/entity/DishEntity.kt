@@ -21,9 +21,13 @@ class DishEntity(
     val price: BigDecimal,
 
     @Column(nullable = false)
-    val isAvailable: Boolean = true
+    val isAvailable: Boolean = true,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    val restaurant: RestaurantEntity
 ) {
-    constructor() : this(0, "", "", BigDecimal.ZERO, true)
+    constructor() : this(0, "", "", BigDecimal.ZERO, true, RestaurantEntity())
 
     fun toDomain() = Dish(
         id = id,
@@ -34,12 +38,13 @@ class DishEntity(
     )
 
     companion object {
-        fun fromDomain(dish: Dish) = DishEntity(
+        fun fromDomain(dish: Dish, restaurant: RestaurantEntity) = DishEntity(
             id = dish.id,
             name = dish.name,
             description = dish.description,
             price = dish.price,
-            isAvailable = dish.isAvailable
+            isAvailable = dish.isAvailable,
+            restaurant = restaurant
         )
     }
 }
