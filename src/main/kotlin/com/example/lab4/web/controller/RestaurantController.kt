@@ -19,10 +19,22 @@ class RestaurantController(
     fun getRestaurantById(@PathVariable id: Long): ResponseEntity<RestaurantResponse> =
         ResponseEntity.ok(restaurantService.findById(id).toResponse())
 
+    @GetMapping("/{id}/dishes")
+    fun getRestaurantDishes(@PathVariable id: Long): ResponseEntity<List<DishResponse>> =
+        ResponseEntity.ok(restaurantService.getMenu(id).map { it.toResponse() })
+
     @PostMapping
     fun createRestaurant(@RequestBody request: RestaurantCreateRequest): ResponseEntity<RestaurantResponse> =
         ResponseEntity.status(HttpStatus.CREATED)
             .body(restaurantService.create(request.toDomain()).toResponse())
+
+    @PostMapping("/{restaurantId}/dishes")
+    fun createDishInRestaurant(
+        @PathVariable restaurantId: Long,
+        @RequestBody request: DishCreateRequest
+    ): ResponseEntity<DishResponse> =
+        ResponseEntity.status(HttpStatus.CREATED)
+            .body(restaurantService.addDish(restaurantId, request.toDomain()).toResponse())
 
     @PutMapping("/{id}")
     fun updateRestaurant(
