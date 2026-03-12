@@ -11,7 +11,7 @@ class DishEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = false, nullable = false)
     val name: String,
 
     @Column(nullable = false)
