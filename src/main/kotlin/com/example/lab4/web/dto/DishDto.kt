@@ -22,7 +22,8 @@ data class DishResponse(
     val name: String,
     val description: String,
     val price: BigDecimal,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
+    val restaurantId: Long
 )
 
 fun Dish.toResponse() = DishResponse(
@@ -30,7 +31,8 @@ fun Dish.toResponse() = DishResponse(
     name = name,
     description = description,
     price = price,
-    isAvailable = isAvailable
+    isAvailable = isAvailable,
+    restaurantId = restaurantId ?: 0
 )
 
 fun DishCreateRequest.toDomain() = Dish(
