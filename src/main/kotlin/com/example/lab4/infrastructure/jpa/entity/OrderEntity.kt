@@ -2,6 +2,8 @@ package com.example.lab4.infrastructure.jpa.entity
 
 import com.example.lab4.domain.model.OrderStatus
 import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import java.time.LocalDateTime
 
 @Entity
@@ -13,7 +15,8 @@ class OrderEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "order_status")
-    val status: OrderStatus = OrderStatus.PENDING,
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    var status: OrderStatus = OrderStatus.PENDING,
 
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
