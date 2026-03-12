@@ -34,7 +34,8 @@ class DishEntity(
         name = name,
         description = description,
         price = price,
-        isAvailable = isAvailable
+        isAvailable = isAvailable,
+        restaurantId = restaurant.id
     )
 
     companion object {
