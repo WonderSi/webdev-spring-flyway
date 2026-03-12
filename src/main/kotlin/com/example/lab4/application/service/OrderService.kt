@@ -45,6 +45,21 @@ class OrderService(
 
     fun updateStatus(id: Long, status: OrderStatus): Order {
         val order = findById(id)
+        validateStatusTransition(order.status, status)
         return orderRepositoryPort.update(order.copy(status = status))
+    }
+
+    private fun validateStatusTransition(current: OrderStatus, next: OrderStatus) {
+        val allowed = mapOf(
+            OrderStatus.PENDING to setOf(OrderStatus.CONFIRMED, OrderStatus.CANCELLED),
+            OrderStatus.CONFIRMED to setOf(OrderStatus.DELIVERED, OrderStatus.CANCELLED),
+            OrderStatus.DELIVERED to emptySet(),
+            OrderStatus.CANCELLED to emptySet()
+        )
+        if (next !in allowed[current]!!) {
+            throw IllegalArgumentException(
+                "Invalid status transition from $current to $next"
+            )
+        }
     }
 }
