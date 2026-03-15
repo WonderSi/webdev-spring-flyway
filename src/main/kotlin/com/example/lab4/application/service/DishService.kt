@@ -2,11 +2,14 @@ package com.example.lab4.application.service
 
 import com.example.lab4.domain.model.Dish
 import com.example.lab4.domain.port.DishRepositoryPort
+import com.example.lab4.infrastructure.jpa.repository.OrderJpaRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DishService(
-    private val dishRepositoryPort: DishRepositoryPort
+    private val dishRepositoryPort: DishRepositoryPort,
+    private val orderJpaRepository: OrderJpaRepository
 ) {
     fun findAll(namePart: String?): List<Dish> =
         if (namePart != null) {
@@ -34,7 +37,14 @@ class DishService(
         return dishRepositoryPort.update(dish.copy(id = id))
     }
 
+    @Transactional
     fun delete(id: Long) {
+        // Убираем блюдо из всех заказов перед удалением
+        val orders = orderJpaRepository.findAll()
+        orders.forEach { order ->
+            order.dishes.removeIf { it.id == id }
+            orderJpaRepository.save(order)
+        }
         val deleted = dishRepositoryPort.deleteById(id)
         if (!deleted) throw NoSuchElementException("Dish with id=$id not found")
     }
